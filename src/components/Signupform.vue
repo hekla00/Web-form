@@ -10,6 +10,11 @@
       <option value="developer">Web Developer</option>
       <option value="designer">Web Designer</option>
     </select>
+
+    <label>Skills:</label>
+    <input type="text" v-model="tempSkill" @keyup.alt="addSkill" />
+    <div :key="skill" v-for="skill in skills" class="skill">{{ skill }}</div>
+
     <!-- first way of doing checkboxes: using a single checkbox and boolean for whether it has been checked or not -->
     <div class="terms">
       <input type="checkbox" v-model="terms" required />
@@ -44,8 +49,21 @@ export default {
       password: "",
       role: "",
       terms: false,
-      name: [],
+      //   name: [],
+      tempSkill: "",
+      skills: [],
     };
+  },
+  methods: {
+    addSkill(e) {
+      if (e.key === "," && this.tempSkill) {
+        //   this if statement is done to avoid having duplicate values
+        if (!this.skill.includes(this.tempSkill)) {
+          this.skills.push(this.tempSkill);
+          this.tempSkill = "";
+        }
+      }
+    },
   },
 };
 </script>
