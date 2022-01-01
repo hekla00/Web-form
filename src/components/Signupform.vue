@@ -1,9 +1,12 @@
 <template>
-  <form>
-    <label>Email</label>
-    <input type="email" required v-model="email" />
-    <label>Password</label>
-    <input type="password" required v-model="password" />
+  <!-- prevent prevents the default action from happing in this case the page refreshing when user has submitted the form -->
+  <form @submit.prevent="handleSubmit">
+    <label>Email:</label>
+    <input type="email" v-model="email" required />
+
+    <label>Password:</label>
+    <input type="password" v-model="password" required />
+    <div v-if="passwordError" class="error">{{ passwordError }}</div>
 
     <label>Role:</label>
     <select v-model="role">
@@ -11,57 +14,68 @@
       <option value="designer">Web Designer</option>
     </select>
 
-    <label>Skills:</label>
-    <input type="text" v-model="tempSkill" @keyup.alt="addSkill" />
-    <div :key="skill" v-for="skill in skills" class="skill">{{ skill }}</div>
+    <label>Skills (press control (ctrl) + comma to add): </label>
+    <input type="text" v-model="tempSkill" @keyup.ctrl="addSkill" />
+    <div v-for="skill in skills" :key="skill" class="pill">
+      <span @click="deleteSkill(skill)">{{ skill }}</span>
+    </div>
 
-    <!-- first way of doing checkboxes: using a single checkbox and boolean for whether it has been checked or not -->
     <div class="terms">
       <input type="checkbox" v-model="terms" required />
       <label>Accept terms and conditions</label>
     </div>
-    <!-- second way of doing checkboxes: using multiple checkboxes and collecting the names in the array name-->
-    <!-- <div>
-      <input type="checkbox" value="shaun" v-model="name" />
-      <label>Shaun</label>
+
+    <div class="submit">
+      <button>Create an Account</button>
     </div>
-    <div>
-      <input type="checkbox" value="yoshi" v-model="name" />
-      <label>yoshi</label>
-    </div>
-    <div>
-      <input type="checkbox" value="mario" v-model="name" />
-      <label>mario</label>
-    </div> -->
   </form>
+
   <p>Email: {{ email }}</p>
   <p>Password: {{ password }}</p>
-  <p>Role: {{ role }}</p>
+  <p>Your role: {{ role }}</p>
   <p>Terms accepted: {{ terms }}</p>
-  <!-- <p>Names: {{ name }}</p> -->
 </template>
 
 <script>
+// challenge
+//   - when a user clicks on a skill, delete that skill
 export default {
   data() {
     return {
       email: "",
       password: "",
-      role: "",
+      role: "developer",
       terms: false,
-      //   name: [],
-      tempSkill: "",
       skills: [],
+      tempSkill: "",
+      passwordError: "",
     };
   },
   methods: {
-    addSkill(e) {
-      if (e.key === "," && this.tempSkill) {
-        //   this if statement is done to avoid having duplicate values
-        if (!this.skill.includes(this.tempSkill)) {
+    addSkill($event) {
+      if ($event.key === "," && this.tempSkill) {
+        if (!this.skills.includes(this.tempSkill)) {
           this.skills.push(this.tempSkill);
-          this.tempSkill = "";
         }
+        this.tempSkill = "";
+      }
+    },
+    deleteSkill(skill) {
+      this.skills = this.skills.filter((item) => {
+        return skill !== item;
+      });
+    },
+    handleSubmit() {
+      // validate password
+      this.passwordError =
+        this.password.length > 5 ? "" : "Password must be at least 6 char long";
+      if (!this.passwordError) {
+        // make request to database to save user
+        console.log("email: ", this.email);
+        console.log("password: ", this.password);
+        console.log("role: ", this.role);
+        console.log("skills: ", this.skills);
+        console.log("terms accepted: ", this.terms);
       }
     },
   },
@@ -102,5 +116,34 @@ input[type="checkbox"] {
   margin: 0 10px 0 0;
   position: relative;
   top: 2px;
+}
+.pill {
+  display: inline-block;
+  margin: 20px 10px 0 0;
+  padding: 6px 12px;
+  background: #eee;
+  border-radius: 20px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  font-weight: bold;
+  color: #777;
+  cursor: pointer;
+}
+button {
+  background: #0b6dff;
+  border: 0;
+  padding: 10px 20px;
+  margin-top: 20px;
+  color: white;
+  border-radius: 20px;
+}
+.submit {
+  text-align: center;
+}
+.error {
+  color: #ff0062;
+  margin-top: 10px;
+  font-size: 0.8em;
+  font-weight: bold;
 }
 </style>
